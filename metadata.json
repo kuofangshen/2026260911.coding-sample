@@ -1,0 +1,6 @@
+{
+  "name": "專案管理與 RFI 追蹤系統",
+  "description": "現代化敏捷看板與工程 RFI 資訊需求單追蹤系統，整合專案甘特圖排程預覽、HTML 即時編輯預覽、剪貼簿貼圖、附件管理與多角色權限。",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

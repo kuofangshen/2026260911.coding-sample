@@ -1,0 +1,152 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --background: #ffffff;
+    --foreground: #000000;
+    --muted: #f5f5f5;
+    --muted-foreground: #525252;
+    --accent: #000000;
+    --accent-foreground: #ffffff;
+    --border: #000000;
+    --border-light: #e5e5e5;
+    --card: #ffffff;
+    --card-foreground: #000000;
+    --ring: #000000;
+  }
+
+  /* Architectural Sharp Corner Discipline */
+  *, *::before, *::after {
+    border-radius: 0px !important;
+    box-shadow: none !important;
+  }
+
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    font-family: "Source Serif 4", Georgia, serif;
+    line-height: 1.6;
+    letter-spacing: -0.01em;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: "Playfair Display", Georgia, serif;
+    letter-spacing: -0.025em;
+  }
+
+  code, kbd, samp, pre, .font-mono {
+    font-family: "JetBrains Mono", monospace;
+  }
+
+  /* Custom Scrollbar - Stark Monochrome */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #f5f5f5;
+    border-left: 1px solid #e5e5e5;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #000000;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #525252;
+  }
+}
+
+/* Texture Pattern Utilities */
+.bg-texture-lines {
+  background-image: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 1px,
+    #000000 1px,
+    #000000 2px
+  );
+  background-size: 100% 4px;
+}
+
+.bg-texture-grid {
+  background-image:
+    linear-gradient(#0000000a 1px, transparent 1px),
+    linear-gradient(90deg, #0000000a 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+.bg-texture-diagonal {
+  background-image: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 24px,
+    #00000010 24px,
+    #00000010 25px
+  );
+}
+
+.bg-texture-dark-lines {
+  background-image: repeating-linear-gradient(
+    90deg,
+    transparent,
+    transparent 1px,
+    #ffffff12 1px,
+    #ffffff12 2px
+  );
+  background-size: 4px 100%;
+}
+
+/* Buttons and Interaction Guidelines */
+.btn-mono-primary {
+  background-color: #000000;
+  color: #ffffff;
+  border: 1px solid #000000;
+  font-family: "JetBrains Mono", monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.625rem 1.25rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  transition: background-color 80ms ease, color 80ms ease, border-color 80ms ease;
+}
+.btn-mono-primary:hover {
+  background-color: #ffffff;
+  color: #000000;
+  border-color: #000000;
+}
+.btn-mono-primary:focus-visible {
+  outline: 3px solid #000000;
+  outline-offset: 3px;
+}
+
+.btn-mono-secondary {
+  background-color: transparent;
+  color: #000000;
+  border: 1px solid #000000;
+  font-family: "JetBrains Mono", monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.625rem 1.25rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  transition: background-color 80ms ease, color 80ms ease;
+}
+.btn-mono-secondary:hover {
+  background-color: #000000;
+  color: #ffffff;
+}
+.btn-mono-secondary:focus-visible {
+  outline: 3px solid #000000;
+  outline-offset: 3px;
+}
