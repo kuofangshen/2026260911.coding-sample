@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   INITIAL_USERS, 
   INITIAL_BOARDS, 
@@ -29,17 +29,42 @@ import { AuditLogsView } from './components/AuditLogsView';
 import { CardModal } from './components/CardModal';
 import { RfiModal } from './components/RfiModal';
 import { FilePreviewModal } from './components/FilePreviewModal';
+import { LocalDataModal } from './components/LocalDataModal';
+
+const LOCAL_STORAGE_KEY = 'kanban_rfi_app_data_v1';
+
+function getInitialData<T>(key: string, fallback: T): T {
+  try {
+    const saved = localStorage.getItem(`${LOCAL_STORAGE_KEY}_${key}`);
+    if (saved) {
+      return JSON.parse(saved);
+    }
+  } catch (e) {
+    console.warn(`無法讀取本機儲存資料 (${key}):`, e);
+  }
+  return fallback;
+}
 
 export default function App() {
-  // Core Entities State
-  const [boards, setBoards] = useState<Board[]>(INITIAL_BOARDS);
-  const [activeBoardId, setActiveBoardId] = useState<string>('board-1');
-  const [cards, setCards] = useState<Card[]>(INITIAL_CARDS);
-  const [rfis, setRfis] = useState<RFI[]>(INITIAL_RFIS);
+  // Core Entities State (整合 LocalStorage 自動持久化)
+  const [boards, setBoards] = useState<Board[]>(() => getInitialData('boards', INITIAL_BOARDS));
+  const [activeBoardId, setActiveBoardId] = useState<string>(() => {
+    try {
+      const saved = localStorage.getItem(`${LOCAL_STORAGE_KEY}_activeBoardId`);
+      return saved || 'board-1';
+    } catch {
+      return 'board-1';
+    }
+  });
+  const [cards, setCards] = useState<Card[]>(() => getInitialData('cards', INITIAL_CARDS));
+  const [rfis, setRfis] = useState<RFI[]>(() => getInitialData('rfis', INITIAL_RFIS));
   const [users] = useState<User[]>(INITIAL_USERS);
-  const [currentUser, setCurrentUser] = useState<User>(INITIAL_USERS[2]); // Default to Guanyu Chen (Member)
-  const [notifications, setNotifications] = useState<AppNotification[]>(INITIAL_NOTIFICATIONS);
-  const [activityLogs, setActivityLogs] = useState<ActivityLog[]>(INITIAL_ACTIVITY_LOGS);
+  const [currentUser, setCurrentUser] = useState<User>(() => {
+    const savedUser = getInitialData<User | null>('currentUser', null);
+    return savedUser || INITIAL_USERS[2];
+  });
+  const [notifications, setNotifications] = useState<AppNotification[]>(() => getInitialData('notifications', INITIAL_NOTIFICATIONS));
+  const [activityLogs, setActivityLogs] = useState<ActivityLog[]>(() => getInitialData('activityLogs', INITIAL_ACTIVITY_LOGS));
 
   // Active View & Modals
   const [currentTab, setCurrentTab] = useState<'kanban' | 'gantt' | 'rfi' | 'htmlStudio' | 'analytics' | 'apiConsole' | 'auditLogs'>('kanban');
@@ -47,6 +72,82 @@ export default function App() {
   const [selectedRfi, setSelectedRfi] = useState<RFI | null>(null);
   const [previewAttachment, setPreviewAttachment] = useState<Attachment | null>(null);
   const [studioCode, setStudioCode] = useState<string>('');
+  const [isLocalDataModalOpen, setIsLocalDataModalOpen] = useState(false);
+
+  // 本地持久化資料自動儲存 (LocalStorage Sync)
+  useEffect(() => {
+    try {
+      localStorage.setItem(`${LOCAL_STORAGE_KEY}_boards`, JSON.stringify(boards));
+    } catch (e) {}
+  }, [boards]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(`${LOCAL_STORAGE_KEY}_cards`, JSON.stringify(cards));
+    } catch (e) {}
+  }, [cards]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(`${LOCAL_STORAGE_KEY}_rfis`, JSON.stringify(rfis));
+    } catch (e) {}
+  }, [rfis]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(`${LOCAL_STORAGE_KEY}_activeBoardId`, activeBoardId);
+    } catch (e) {}
+  }, [activeBoardId]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(`${LOCAL_STORAGE_KEY}_currentUser`, JSON.stringify(currentUser));
+    } catch (e) {}
+  }, [currentUser]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(`${LOCAL_STORAGE_KEY}_notifications`, JSON.stringify(notifications));
+    } catch (e) {}
+  }, [notifications]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(`${LOCAL_STORAGE_KEY}_activityLogs`, JSON.stringify(activityLogs));
+    } catch (e) {}
+  }, [activityLogs]);
+
+  // 資料匯入與重置處理
+  const handleImportData = (data: {
+    boards?: Board[];
+    cards?: Card[];
+    rfis?: RFI[];
+    activityLogs?: ActivityLog[];
+    notifications?: AppNotification[];
+  }) => {
+    if (data.boards && Array.isArray(data.boards)) setBoards(data.boards);
+    if (data.cards && Array.isArray(data.cards)) setCards(data.cards);
+    if (data.rfis && Array.isArray(data.rfis)) setRfis(data.rfis);
+    if (data.activityLogs && Array.isArray(data.activityLogs)) setActivityLogs(data.activityLogs);
+    if (data.notifications && Array.isArray(data.notifications)) setNotifications(data.notifications);
+  };
+
+  const handleResetData = () => {
+    try {
+      Object.keys(localStorage).forEach(k => {
+        if (k.startsWith(LOCAL_STORAGE_KEY)) {
+          localStorage.removeItem(k);
+        }
+      });
+    } catch (e) {}
+    setBoards(INITIAL_BOARDS);
+    setActiveBoardId('board-1');
+    setCards(INITIAL_CARDS);
+    setRfis(INITIAL_RFIS);
+    setCurrentUser(INITIAL_USERS[2]);
+    setNotifications(INITIAL_NOTIFICATIONS);
+    setActivityLogs(INITIAL_ACTIVITY_LOGS);
+  };
 
   const activeBoard = boards.find(b => b.id === activeBoardId) || boards[0];
 
@@ -326,6 +427,7 @@ export default function App() {
         notifications={notifications}
         onNotificationClick={handleNotificationClick}
         onMarkAllNotificationsRead={() => setNotifications(prev => prev.map(n => ({ ...n, read: true })))}
+        onOpenLocalData={() => setIsLocalDataModalOpen(true)}
       />
 
       {/* Main Workspace Area */}
@@ -449,6 +551,19 @@ export default function App() {
           onClose={() => setPreviewAttachment(null)}
         />
       )}
+
+      {/* MODAL 4: Local Data Persistence & Backup Modal */}
+      <LocalDataModal
+        isOpen={isLocalDataModalOpen}
+        onClose={() => setIsLocalDataModalOpen(false)}
+        boards={boards}
+        cards={cards}
+        rfis={rfis}
+        activityLogs={activityLogs}
+        notifications={notifications}
+        onImportData={handleImportData}
+        onResetData={handleResetData}
+      />
     </div>
   );
 }

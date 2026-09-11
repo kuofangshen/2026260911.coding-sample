@@ -11,7 +11,8 @@ import {
   Shield, 
   Check, 
   Layers,
-  CalendarRange
+  CalendarRange,
+  HardDrive
 } from 'lucide-react';
 import { Board, User, AppNotification } from '../types';
 import { ROLE_PERMISSIONS, formatDateTime } from '../utils';
@@ -28,6 +29,7 @@ interface NavbarProps {
   notifications: AppNotification[];
   onNotificationClick: (notif: AppNotification) => void;
   onMarkAllNotificationsRead: () => void;
+  onOpenLocalData?: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -42,6 +44,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   notifications,
   onNotificationClick,
   onMarkAllNotificationsRead,
+  onOpenLocalData,
 }) => {
   const [showRoleMenu, setShowRoleMenu] = useState(false);
   const [showNotifMenu, setShowNotifMenu] = useState(false);
@@ -189,6 +192,19 @@ export const Navbar: React.FC<NavbarProps> = ({
 
         {/* Right: Role Switcher & Notifications & Profile */}
         <div className="flex items-center gap-3">
+          {/* Local Data Management */}
+          {onOpenLocalData && (
+            <button
+              onClick={onOpenLocalData}
+              className="flex items-center gap-1.5 px-2.5 py-1.5 bg-white hover:bg-neutral-100 border border-black text-xs font-mono font-semibold text-black transition-colors duration-100"
+              title="本機資料持久化與備份管理"
+              id="btn-local-data-mgmt"
+            >
+              <HardDrive className="w-3.5 h-3.5 text-black" strokeWidth={1.5} />
+              <span className="hidden md:inline">本機資料</span>
+            </button>
+          )}
+
           {/* Role Switcher Pill */}
           <div className="relative">
             <button
